@@ -1,0 +1,7 @@
+/cmake-build-debug/
+/brain_mri_raws/
+/MRI_originals_png/
+/Assignment 2.pdf
+*.tar.gz
+*.txt
+*.py
