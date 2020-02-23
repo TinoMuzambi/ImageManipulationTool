@@ -1,14 +1,12 @@
 default:
-	g++ driver.cpp stu_database.cpp -o driver
+	g++ volimage.cpp -o volimage
 
-driver.run: driver.o stu_database.o
-	g++ driver.run driver.o stu_database.o
-driver.o: driver.cpp stu_database.h
-	g++ -c -o driver.o driver.cpp
-stu_database.o: stu_database.cpp stu_database.h
-	g++ -c -o stu_database.o stu_database.cpp
+volimage.run: volimage.o
+	g++ volimage.run volimage.o
+volimage.o: volimage.cpp
+	g++ -c -o volimage.o volimage.cpp
 
 clean:
-	rm -f ./driver *.o
+	rm -f ./volimage *.o
 run:
-	./driver
+	./volimage
