@@ -2,7 +2,7 @@
 
 #include "volimage.h"
 
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[]) { //TODO parse arguments properly.
     string prefix;
     string line1;
     string line2;
@@ -48,6 +48,7 @@ bool MZMTIN002::VolImage::readImages(string baseName) {
             cout << value << " ";
         }
     }
+    // 429 303 123 - MRI.data contents
     return false;
 }
 

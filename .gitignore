@@ -6,3 +6,4 @@
 *.txt
 *.py
 /volimage
+/.idea
