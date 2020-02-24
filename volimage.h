@@ -7,6 +7,8 @@
 #include <string>
 #include "fstream"
 #include <sstream>
+#include <cwchar>
+#include "cstring"
 
 using namespace std;
 namespace MZMTIN002 {

@@ -33,18 +33,20 @@ bool MZMTIN002::VolImage::readImages(string baseName) {
     ifstream in(baseName + ".data");
     string header;
     getline(in, header);
-    cout << header << endl;
     stringstream ss(header);
     string token;
-    vector<int> dims; // Vector that stores the ints in the data file.
-    while (ss >> token) {
-        stringstream ss2(token);
-        int curr;
-        ss2 >> curr;
-        dims.push_back(curr);
+    vector<string> dims; // Vector that stores the ints in the data file.
+    while (getline(ss, token, ' ')) {
+        dims.push_back(token);
     }
-    for (int i = 0; i < dims[2]; i++) {
-        cout << i << endl;
+    for (int i = 0; i < stoi(dims[2]); i++) {
+        ifstream raw(baseName + to_string(i) + ".raw", ios::binary);
+        char buf[sizeof(short)];
+        short value;
+        while (raw.read(buf, sizeof(buf))) {
+            memcpy(&value, buf, sizeof(value));
+            cout << value << " ";
+        }
     }
     return false;
 }
