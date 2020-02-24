@@ -12,6 +12,10 @@ int main(int argc, char* argv[]) {
         line2 = argv[3];
     }
     catch (int e) {}
-
+    prefix += ".data";
+    ifstream in(prefix);
+    string header;
+    getline(in, header);
+    cout << header << endl;
     return 0;
 }
