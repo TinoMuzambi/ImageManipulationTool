@@ -13,7 +13,24 @@ int main(int argc, char* argv[]) {
     }
     catch (int e) {}
 
-    ifstream in(prefix + ".data");
+    MZMTIN002::VolImage volImage;
+    volImage.readImages(prefix);
+    
+    return 0;
+}
+
+MZMTIN002::VolImage::VolImage() {
+    MZMTIN002::VolImage::width = 0;
+    MZMTIN002::VolImage::height = 0;
+    MZMTIN002::VolImage::slices.clear();
+}
+
+MZMTIN002::VolImage::~VolImage() {
+    // delete stuff
+}
+
+bool MZMTIN002::VolImage::readImages(string baseName) {
+    ifstream in(baseName + ".data");
     string header;
     getline(in, header);
     cout << header << endl;
@@ -26,34 +43,20 @@ int main(int argc, char* argv[]) {
         ss2 >> curr;
         dims.push_back(curr);
     }
-    for (int i = 0; i < dims[0]; i++) {
-        // do valuable stuff.
+    for (int i = 0; i < dims[2]; i++) {
+        cout << i << endl;
     }
-    return 0;
-}
-
-VolImage::VolImage() {
-    VolImage::width = 0;
-    VolImage::height = 0;
-    VolImage::slices.clear();
-}
-
-VolImage::~VolImage() {
-    // delete stuff
-}
-
-bool VolImage::readImages(string baseName) {
     return false;
 }
 
-void VolImage::diffmap(int sliceI, int sliceJ, string output_prefix) {
+void MZMTIN002::VolImage::diffmap(int sliceI, int sliceJ, string output_prefix) {
 
 }
 
-void VolImage::extract(int sliceId, string output_prefix) {
+void MZMTIN002::VolImage::extract(int sliceId, string output_prefix) {
 
 }
 
-int VolImage::volImageSize(void) {
+int MZMTIN002::VolImage::volImageSize(void) {
     return 0;
 }
