@@ -5,14 +5,42 @@
 int main(int argc, char* argv[]) { //TODO parse arguments properly.
     // brain_mri_raws/MRI d 20 50 diffout.txt -x 22 extractout.txt
     string prefix;
-    string line1;
-    string line2;
-    for (int i = 1; i < argc; i++) {
-        cout << argv[i] << endl;
-    }
-
+    int i;
+    int j;
+    string outfile;
     MZMTIN002::VolImage volImage;
-//    volImage.readImages(prefix);
+    vector<string> comms;
+    for (int i = 1; i < argc; i++) {
+//        cout << argv[i] << endl;
+        comms.emplace_back(argv[i]);
+    }
+    if (comms.empty()) {
+        puts("Arguments required. No arguments found.");
+        exit(0);
+    }
+    else if (comms.size() == 1) {
+        prefix = comms[0];
+        volImage.readImages(prefix);
+    }
+    else if (comms.size() == 5) {
+        prefix = comms[0];
+        volImage.readImages(prefix);
+        i = stoi(comms[2]);
+        j = stoi(comms[3]);
+        outfile = comms[4];
+        volImage.diffmap(i, j, outfile);
+    }
+    else if (comms.size() == 4) {
+        prefix = comms[0];
+        volImage.readImages(prefix);
+        i = stoi(comms[2]);
+        outfile = comms[3];
+        volImage.extract(i, outfile);
+    }
+    else {
+        puts("Invalid number of arguments.");
+        exit(0);
+    }
     
     return 0;
 }
@@ -28,6 +56,7 @@ MZMTIN002::VolImage::~VolImage() {
 }
 
 bool MZMTIN002::VolImage::readImages(string baseName) {
+    puts("In readImages func.");
     ifstream in(baseName + ".data");
     string header;
     getline(in, header);
@@ -51,11 +80,11 @@ bool MZMTIN002::VolImage::readImages(string baseName) {
 }
 
 void MZMTIN002::VolImage::diffmap(int sliceI, int sliceJ, string output_prefix) {
-
+    puts("In diff map func.");
 }
 
 void MZMTIN002::VolImage::extract(int sliceId, string output_prefix) {
-
+    puts("In extact func.");
 }
 
 int MZMTIN002::VolImage::volImageSize(void) {
