@@ -3,18 +3,16 @@
 #include "volimage.h"
 
 int main(int argc, char* argv[]) { //TODO parse arguments properly.
+    // brain_mri_raws/MRI d 20 50 diffout.txt -x 22 extractout.txt
     string prefix;
     string line1;
     string line2;
-    try {
-        prefix = argv[1];
-        line1 = argv[2];
-        line2 = argv[3];
+    for (int i = 1; i < argc; i++) {
+        cout << argv[i] << endl;
     }
-    catch (int e) {}
 
     MZMTIN002::VolImage volImage;
-    volImage.readImages(prefix);
+//    volImage.readImages(prefix);
     
     return 0;
 }
