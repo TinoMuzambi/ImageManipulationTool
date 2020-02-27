@@ -76,10 +76,10 @@ bool MZMTIN002::VolImage::readImages(string baseName) {
     int numImages = stoi(dims[2]);
     for (int i = 0; i < numImages; i++) {
         ifstream raw(baseName + to_string(i) + ".raw", ios::binary);
-        unsigned char **rawRows = new unsigned char* [height];
-        for (int j = 0; j < width; ++j) {
-            for (int k = 0; k < height; ++k) {
-                char buf[height];
+        unsigned char **rawRows = new unsigned char* [width];
+        for (int j = 0; j < height; ++j) {
+            for (int k = 0; k < width; ++k) {
+                char buf[width];
                 unsigned char value;
                 while (raw.read(buf, sizeof(buf))) {
                     memcpy(&value, buf, sizeof(value));
@@ -101,6 +101,11 @@ bool MZMTIN002::VolImage::readImages(string baseName) {
 
 void MZMTIN002::VolImage::diffmap(int sliceI, int sliceJ, string output_prefix) {
     puts("In diff map func.");
+    for (int j = 0; j < height; ++j) {
+        for (int k = 0; k < width; ++k) {
+            cout << (int)(abs((float)slices[sliceI][j][k] - (float)slices[sliceJ][j][k])/2) << endl;
+        }
+    }
 }
 
 void MZMTIN002::VolImage::extract(int sliceId, string output_prefix) {
@@ -108,5 +113,5 @@ void MZMTIN002::VolImage::extract(int sliceId, string output_prefix) {
 }
 
 int MZMTIN002::VolImage::volImageSize(void) {
-    return 0;
+    return width * height;
 }
