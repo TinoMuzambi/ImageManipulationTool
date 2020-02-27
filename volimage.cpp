@@ -47,15 +47,17 @@ int main(int argc, char* argv[]) { //TODO parse arguments properly.
 }
 
 MZMTIN002::VolImage::VolImage() {
+    puts("In constructor");
     MZMTIN002::VolImage::width = 0;
     MZMTIN002::VolImage::height = 0;
     MZMTIN002::VolImage::slices.clear();
 }
 
 MZMTIN002::VolImage::~VolImage() {
-    for (int i = 0; i < slices.size(); ++i) {
-        delete[] slices[i];
-    }
+    puts("In destructor");
+//    for (int i = 0; i < slices.size(); ++i) { //TODO Fix double free or corruption (!prev)
+//        delete[] slices[i];
+//    }
 }
 
 bool MZMTIN002::VolImage::readImages(string baseName) {
@@ -69,12 +71,15 @@ bool MZMTIN002::VolImage::readImages(string baseName) {
     while (getline(ss, token, ' ')) {
         dims.push_back(token);
     }
-    for (int i = 0; i < stoi(dims[2]); i++) {
+    width = stoi(dims[0]);
+    height = stoi(dims[1]);
+    int numImages = stoi(dims[2]);
+    for (int i = 0; i < numImages; i++) {
         ifstream raw(baseName + to_string(i) + ".raw", ios::binary);
-        unsigned char **rawRows = new unsigned char* [stoi(dims[1])];
-        for (int j = 0; j < stoi(dims[0]); ++j) {
-            for (int k = 0; k < stoi(dims[1]); ++k) {
-                char buf[stoi(dims[1])];
+        unsigned char **rawRows = new unsigned char* [height];
+        for (int j = 0; j < width; ++j) {
+            for (int k = 0; k < height; ++k) {
+                char buf[height];
                 unsigned char value;
                 while (raw.read(buf, sizeof(buf))) {
                     memcpy(&value, buf, sizeof(value));

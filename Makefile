@@ -8,5 +8,3 @@ volimage.o: volimage.cpp
 
 clean:
 	rm -f ./volimage *.o
-run:
-	./volimage
