@@ -1,5 +1,6 @@
 // MZMTIN002
 
+#include <regex>
 #include "volimage.h"
 
 int main(int argc, char* argv[]) { //TODO parse arguments properly.
@@ -68,12 +69,24 @@ bool MZMTIN002::VolImage::readImages(string baseName) {
     }
     for (int i = 0; i < stoi(dims[2]); i++) {
         ifstream raw(baseName + to_string(i) + ".raw", ios::binary);
-        char buf[sizeof(short)];
-        short value;
-        while (raw.read(buf, sizeof(buf))) {
-            memcpy(&value, buf, sizeof(value));
-            cout << value << " ";
+        unsigned char **rawRows = new unsigned char* [stoi(dims[1])];
+        for (int j = 0; j < stoi(dims[0]); ++j) {
+            for (int k = 0; k < stoi(dims[1]); ++k) {
+                char buf[stoi(dims[1])];
+                unsigned char value;
+                while (raw.read(buf, sizeof(buf))) {
+                    memcpy(&value, buf, sizeof(value));
+                }
+                rawRows[k] = &value;
+            }
+            slices.push_back(rawRows);
         }
+//        char buf[sizeof(short)];
+//        unsigned char value;
+//        while (raw.read(buf, sizeof(buf))) {
+//            memcpy(&value, buf, sizeof(value));
+//            cout << value << endl;
+//        }
     }
     // 429 303 123 - MRI.data contents
     return false;
