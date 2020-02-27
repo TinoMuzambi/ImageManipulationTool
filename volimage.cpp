@@ -53,7 +53,9 @@ MZMTIN002::VolImage::VolImage() {
 }
 
 MZMTIN002::VolImage::~VolImage() {
-    // delete stuff
+    for (int i = 0; i < slices.size(); ++i) {
+        delete[] slices[i];
+    }
 }
 
 bool MZMTIN002::VolImage::readImages(string baseName) {
