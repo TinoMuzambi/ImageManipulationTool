@@ -3,8 +3,8 @@
 #include <regex>
 #include "volimage.h"
 
-int main(int argc, char* argv[]) { //TODO parse arguments properly.
-    // brain_mri_raws/MRI d 20 50 diffout.txt -x 22 extractout.txt
+int main(int argc, char* argv[]) {
+    // brain_mri_raws/MRI -d 20 50 diffout.txt -x 22 extractout.txt
     string prefix;
     int i;
     int j;
@@ -42,7 +42,6 @@ int main(int argc, char* argv[]) { //TODO parse arguments properly.
         puts("Invalid number of arguments.");
         exit(0);
     }
-    
     return 0;
 }
 
@@ -55,9 +54,7 @@ MZMTIN002::VolImage::VolImage() {
 
 MZMTIN002::VolImage::~VolImage() {
     puts("In destructor");
-//    for (int i = 0; i < slices.size(); ++i) { //TODO Fix double free or corruption (!prev)
-//        delete[] slices[i];
-//    }
+//    for (auto x = 0; x <)
 }
 
 bool MZMTIN002::VolImage::readImages(string baseName) {
@@ -74,27 +71,42 @@ bool MZMTIN002::VolImage::readImages(string baseName) {
     width = stoi(dims[0]);
     height = stoi(dims[1]);
     int numImages = stoi(dims[2]);
-    for (int i = 0; i < numImages; i++) {
-        ifstream raw(baseName + to_string(i) + ".raw", ios::binary);
-        unsigned char **rawRows = new unsigned char* [width];
-        for (int j = 0; j < height; ++j) {
-            for (int k = 0; k < width; ++k) {
+    auto temp = new unsigned char**[numImages];
+    for (auto x = 0; x < numImages; x++) {
+        ifstream raw(baseName + to_string(x) + ".raw", ios::binary);
+        temp[x] = new unsigned char*[height];
+        for (auto y = 0; y < height; y++) {
+            temp[x][y] = new unsigned char[width];
+            for (auto z = 0; z < width; z++) {
                 char buf[width];
                 unsigned char value;
                 while (raw.read(buf, sizeof(buf))) {
                     memcpy(&value, buf, sizeof(value));
                 }
-                rawRows[k] = &value;
+                temp[x][y][z] = value;
             }
-            slices.push_back(rawRows);
         }
+    }
+//    for (int i = 0; i < numImages; i++) {
+//        ifstream raw(baseName + to_string(i) + ".raw", ios::binary);
+//        unsigned char **rawRows = new unsigned char* [width];
+//        for (int j = 0; j < height; ++j) {
+//            for (int k = 0; k < width; ++k) {
+//                char buf[width];
+//                unsigned char value;
+//                while (raw.read(buf, sizeof(buf))) {
+//                    memcpy(&value, buf, sizeof(value));
+//                }
+//                rawRows[k] = &value;
+//            }
+//            slices.push_back(rawRows);
+//        }
 //        char buf[sizeof(short)];
 //        unsigned char value;
 //        while (raw.read(buf, sizeof(buf))) {
 //            memcpy(&value, buf, sizeof(value));
 //            cout << value << endl;
 //        }
-    }
     // 429 303 123 - MRI.data contents
     return false;
 }
@@ -110,6 +122,7 @@ void MZMTIN002::VolImage::diffmap(int sliceI, int sliceJ, string output_prefix) 
 
 void MZMTIN002::VolImage::extract(int sliceId, string output_prefix) {
     puts("In extact func.");
+    cout << *slices[sliceId] << endl;
 }
 
 int MZMTIN002::VolImage::volImageSize(void) {
