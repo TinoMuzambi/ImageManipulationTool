@@ -5,5 +5,9 @@
 *.tar.gz
 *.txt
 *.py
+*.bin
+*.raw
+*.sh
+*.dat
 /volimage
 /.idea

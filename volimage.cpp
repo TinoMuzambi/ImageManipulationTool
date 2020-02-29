@@ -54,7 +54,12 @@ MZMTIN002::VolImage::VolImage() {
 
 MZMTIN002::VolImage::~VolImage() {
     puts("In destructor");
-//    for (auto x = 0; x <)
+    for (auto x = 0; x < slices.size(); x++) {
+        for (auto y = 0; y < height; y++) {
+            delete slices[x][y];
+        }
+        delete slices[x];
+    }
 }
 
 bool MZMTIN002::VolImage::readImages(string baseName) {
@@ -79,13 +84,16 @@ bool MZMTIN002::VolImage::readImages(string baseName) {
             temp[x][y] = new unsigned char[width];
             for (auto z = 0; z < width; z++) {
                 char buf[width];
-                unsigned char value;
+                unsigned char value = 0;
                 while (raw.read(buf, sizeof(buf))) {
                     memcpy(&value, buf, sizeof(value));
                 }
+                cout << z << endl;
                 temp[x][y][z] = value;
+                cout << temp[x][y][z] << endl;
             }
         }
+        slices.push_back(temp[x]);
     }
 //    for (int i = 0; i < numImages; i++) {
 //        ifstream raw(baseName + to_string(i) + ".raw", ios::binary);
@@ -122,7 +130,20 @@ void MZMTIN002::VolImage::diffmap(int sliceI, int sliceJ, string output_prefix) 
 
 void MZMTIN002::VolImage::extract(int sliceId, string output_prefix) {
     puts("In extact func.");
-    cout << *slices[sliceId] << endl;
+    cout << slices.size() << endl;
+    cout << slices[0] << endl;
+    cout << slices[0][0] << endl;
+    cout << int(slices[0][0][0]) << endl;
+    string pathname("output");
+    
+    ofstream outdat(pathname + ".dat", ios::binary);
+    string head = to_string(width) + " 1 1";
+    outdat << head.c_str() << endl;
+    outdat.close();
+    
+    ofstream outRaw(pathname + ".raw", ios::binary);
+    outRaw.write(reinterpret_cast<char*>(slices.data()), slices.size());
+    outRaw.close();
 }
 
 int MZMTIN002::VolImage::volImageSize(void) {

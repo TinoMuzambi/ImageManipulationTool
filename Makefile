@@ -8,3 +8,6 @@ volimage.o: volimage.cpp
 
 clean:
 	rm -f ./volimage *.o
+	rm -f *.dat
+	rm -f *.bin
+	rm -f *.raw
