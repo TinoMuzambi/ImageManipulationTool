@@ -22,6 +22,8 @@ int main(int argc, char* argv[]) {
     else if (comms.size() == 1) {
         prefix = comms[0];
         volImage.readImages(prefix);
+        cout << "Number of images: " << volImage.numImages << endl;
+        cout << "Number of bytes required: " << volImage.volImageSize() << endl;
     }
     else if (comms.size() == 5) {
         prefix = comms[0];
@@ -30,6 +32,8 @@ int main(int argc, char* argv[]) {
         j = stoi(comms[3]);
         outfile = comms[4];
         volImage.diffmap(i, j, outfile);
+        cout << "Number of images: " << volImage.numImages << endl;
+        cout << "Number of bytes required: " << volImage.volImageSize() << endl;
     }
     else if (comms.size() == 4) {
         prefix = comms[0];
@@ -37,6 +41,8 @@ int main(int argc, char* argv[]) {
         i = stoi(comms[2]);
         outfile = comms[3];
         volImage.extract(i, outfile);
+        cout << "Number of images: " << volImage.numImages << endl;
+        cout << "Number of bytes required: " << volImage.volImageSize() << endl;
     }
     else {
         puts("Invalid number of arguments.");
@@ -49,6 +55,7 @@ MZMTIN002::VolImage::VolImage() {
     puts("In constructor");
     MZMTIN002::VolImage::width = 0;
     MZMTIN002::VolImage::height = 0;
+    MZMTIN002::VolImage::numImages = 0;
     MZMTIN002::VolImage::slices.clear();
 }
 
@@ -75,77 +82,74 @@ bool MZMTIN002::VolImage::readImages(string baseName) {
     }
     width = stoi(dims[0]);
     height = stoi(dims[1]);
-    int numImages = stoi(dims[2]);
-    auto temp = new unsigned char**[numImages];
+    numImages = stoi(dims[2]);
+    streampos size;
+    unsigned char ** temp = nullptr;
     for (auto x = 0; x < numImages; x++) {
-        ifstream raw(baseName + to_string(x) + ".raw", ios::binary);
-        temp[x] = new unsigned char*[height];
+        ifstream raw(baseName + to_string(x) + ".raw", ios::binary | ios::ate);
+
+        if(!raw) {
+            puts("Couldn't open file");
+            return false;
+        }
+        temp = new unsigned char*[height];
         for (auto y = 0; y < height; y++) {
-            temp[x][y] = new unsigned char[width];
+            temp[y] = new unsigned char[width];
+
             for (auto z = 0; z < width; z++) {
-                char buf[width];
-                unsigned char value = 0;
-                while (raw.read(buf, sizeof(buf))) {
-                    memcpy(&value, buf, sizeof(value));
-                }
-                cout << z << endl;
-                temp[x][y][z] = value;
-                cout << temp[x][y][z] << endl;
+                temp[y][z] = raw.get();
+//                size = raw.tellg();
+//                raw.seekg(0, ios_base::end);
+//                raw.read(reinterpret_cast<char *>(temp[x][y][z]), size);
+//                raw.seekg(0, ios_base::beg);
+//                cout << slices.size() << endl;
             }
         }
-        slices.push_back(temp[x]);
+        raw.close();
+        slices.push_back(temp);
     }
-//    for (int i = 0; i < numImages; i++) {
-//        ifstream raw(baseName + to_string(i) + ".raw", ios::binary);
-//        unsigned char **rawRows = new unsigned char* [width];
-//        for (int j = 0; j < height; ++j) {
-//            for (int k = 0; k < width; ++k) {
-//                char buf[width];
-//                unsigned char value;
-//                while (raw.read(buf, sizeof(buf))) {
-//                    memcpy(&value, buf, sizeof(value));
-//                }
-//                rawRows[k] = &value;
-//            }
-//            slices.push_back(rawRows);
-//        }
-//        char buf[sizeof(short)];
-//        unsigned char value;
-//        while (raw.read(buf, sizeof(buf))) {
-//            memcpy(&value, buf, sizeof(value));
-//            cout << value << endl;
-//        }
     // 429 303 123 - MRI.data contents
-    return false;
+    return true;
 }
 
 void MZMTIN002::VolImage::diffmap(int sliceI, int sliceJ, string output_prefix) {
     puts("In diff map func.");
-    for (int j = 0; j < height; ++j) {
-        for (int k = 0; k < width; ++k) {
-            cout << (int)(abs((float)slices[sliceI][j][k] - (float)slices[sliceJ][j][k])/2) << endl;
+    auto diff = new int*[height];
+    for (int j = 0; j < height; j++) {
+        diff[j] = new int[width];
+        for (int k = 0; k < width; k++) {
+            diff[j][k] = (int)(abs((float)slices[sliceI][j][k] - (float)slices[sliceJ][j][k])/2);
         }
     }
+
+    ofstream outRaw(output_prefix + ".raw", ios::binary);
+    outRaw.write(reinterpret_cast<char*>(diff), slices.size());
+    outRaw.close();
+    cout << "Successfully computed diffmap from slice " << sliceI << " to " << sliceJ << " and saved result to " << output_prefix << ".raw" << endl;
 }
 
 void MZMTIN002::VolImage::extract(int sliceId, string output_prefix) {
-    puts("In extact func.");
-    cout << slices.size() << endl;
-    cout << slices[0] << endl;
-    cout << slices[0][0] << endl;
-    cout << int(slices[0][0][0]) << endl;
-    string pathname("output");
-    
-    ofstream outdat(pathname + ".dat", ios::binary);
-    string head = to_string(width) + " 1 1";
-    outdat << head.c_str() << endl;
+    puts("In extract func.");
+//    cout << slices.size() << endl;
+//    cout << slices[0] << endl;
+//    cout << slices[0][0] << endl;
+//    cout << int(slices[0][0][0]) << endl;
+    ofstream outdat(output_prefix + ".dat", ios::binary);
+    string head = to_string(width) + to_string(height) +" 1";
+    outdat << head.c_str();
     outdat.close();
     
-    ofstream outRaw(pathname + ".raw", ios::binary);
-    outRaw.write(reinterpret_cast<char*>(slices.data()), slices.size());
+    ofstream outRaw(output_prefix + ".raw", ios::binary);
+    for (auto i = 0; i < height; i++) {
+        for (auto j = 0; j < width; j++) {
+            outRaw << slices[sliceId][i][j];
+        }
+    }
     outRaw.close();
+
+    cout << "Successfully extracted slice " << sliceId << " from the vector and saved result to " << output_prefix << ".raw" << endl;
 }
 
 int MZMTIN002::VolImage::volImageSize(void) {
-    return width * height;
+    return width * height * numImages + sizeof(char) + sizeof(char*) + sizeof(char**);
 }

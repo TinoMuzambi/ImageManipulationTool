@@ -36,6 +36,8 @@ namespace MZMTIN002 {
         // number of bytes uses to store image data bytes
         //and pointers (ignore vector<> container, dims etc)
         int volImageSize(void); // define in .cpp
+
+        int numImages;
     };
 }
 
