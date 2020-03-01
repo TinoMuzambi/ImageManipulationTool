@@ -73,6 +73,10 @@ bool MZMTIN002::VolImage::readImages(string baseName) {
  * @param output_prefix the output filename sequence.
  */
 void MZMTIN002::VolImage::diffmap(int sliceI, int sliceJ, string output_prefix) {
+    if (sliceI >= height || sliceJ >= width) { //Error checking
+        puts("slice indexes out of bounds");
+        exit(1);
+    }
     ofstream outRaw(output_prefix + ".raw", ios::binary);
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
@@ -90,6 +94,10 @@ void MZMTIN002::VolImage::diffmap(int sliceI, int sliceJ, string output_prefix) 
  * @param output_prefix he output filename sequence.
  */
 void MZMTIN002::VolImage::extract(int sliceId, string output_prefix) {
+    if (sliceId >= numImages) { //Error checking
+        puts("slice index out of bounds");
+        exit(1);
+    }
     ofstream outdat(output_prefix + ".dat", ios::binary);
     outdat << to_string(width) + " " + to_string(height) +" 1";
     outdat.close();
@@ -116,6 +124,10 @@ void MZMTIN002::VolImage::extract(int sliceId, string output_prefix) {
  * @param output_prefix he output filename sequence.
  */
 void MZMTIN002::VolImage::extractrow(int sliceId, string output_prefix) {
+    if (sliceId >= height) { //Error checking
+        puts("slice indexes out of bounds");
+        exit(1);
+    }
     ofstream outdat(output_prefix + ".dat", ios::binary);
     outdat << to_string(width) + " " + to_string(height) +" 1";
     outdat.close();
