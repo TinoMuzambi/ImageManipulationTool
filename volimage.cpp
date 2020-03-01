@@ -91,7 +91,7 @@ void MZMTIN002::VolImage::diffmap(int sliceI, int sliceJ, string output_prefix) 
  */
 void MZMTIN002::VolImage::extract(int sliceId, string output_prefix) {
     ofstream outdat(output_prefix + ".dat", ios::binary);
-    outdat << to_string(width) + to_string(height) +" 1";
+    outdat << to_string(width) + " " + to_string(height) +" 1";
     outdat.close();
 
     for (auto i = 0; i < slices.size(); i++) {
@@ -117,13 +117,17 @@ void MZMTIN002::VolImage::extract(int sliceId, string output_prefix) {
  */
 void MZMTIN002::VolImage::extractrow(int sliceId, string output_prefix) {
     ofstream outdat(output_prefix + ".dat", ios::binary);
-    outdat << to_string(width) + to_string(height) +" 1";
+    outdat << to_string(width) + " " + to_string(height) +" 1";
     outdat.close();
 
     for (auto i = 0; i < slices.size(); i++) {
         ofstream outRaw(output_prefix + ".raw", ios::binary);
         for (auto j = 0; j < height; j++) {
-            outRaw << slices[i][sliceId];
+            if (j == sliceId) {
+                for (auto k = 0; k < width; k++) {
+                    outRaw << slices[i][sliceId][k];
+                }
+            }
         }
         outRaw.close();
     }
@@ -136,8 +140,6 @@ void MZMTIN002::VolImage::extractrow(int sliceId, string output_prefix) {
  * @return int number of bytes.
  */
 int MZMTIN002::VolImage::volImageSize(void) {
-    // 16287537
-    // 299119
-    return width * height * numImages + sizeof(char) + sizeof(char*) + sizeof(char**);
+    return numImages * (height * width * sizeof(char) + height * sizeof(char*)) + numImages * sizeof(char*);
 }
 
