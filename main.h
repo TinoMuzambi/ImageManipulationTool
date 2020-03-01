@@ -5,7 +5,4 @@
 
 #include "volimage.h"
 
-class main {};
-
-
 #endif //ASSIGNMENT_2_MAIN_H
