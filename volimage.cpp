@@ -86,7 +86,7 @@ bool MZMTIN002::VolImage::readImages(string baseName) {
     streampos size;
     unsigned char ** temp = nullptr;
     for (auto x = 0; x < numImages; x++) {
-        ifstream raw(baseName + to_string(x) + ".raw", ios::binary | ios::ate);
+        ifstream raw(baseName + to_string(x) + ".raw", ios::binary);
 
         if(!raw) {
             puts("Couldn't open file");
@@ -98,32 +98,33 @@ bool MZMTIN002::VolImage::readImages(string baseName) {
 
             for (auto z = 0; z < width; z++) {
                 temp[y][z] = raw.get();
-//                size = raw.tellg();
-//                raw.seekg(0, ios_base::end);
-//                raw.read(reinterpret_cast<char *>(temp[x][y][z]), size);
-//                raw.seekg(0, ios_base::beg);
-//                cout << slices.size() << endl;
             }
         }
         raw.close();
         slices.push_back(temp);
     }
+
+    ofstream outRaw("test.raw", ios::binary);
+    for (auto k = 0; k < numImages; k++) {
+        for (auto i = 0; i < height; i++) {
+            for (auto j = 0; j < width; j++) {
+                outRaw << slices[k][i][j];
+            }
+        }
+    }
+    outRaw.close();
     // 429 303 123 - MRI.data contents
     return true;
 }
 
 void MZMTIN002::VolImage::diffmap(int sliceI, int sliceJ, string output_prefix) {
     puts("In diff map func.");
-    auto diff = new int*[height];
-    for (int j = 0; j < height; j++) {
-        diff[j] = new int[width];
-        for (int k = 0; k < width; k++) {
-            diff[j][k] = (int)(abs((float)slices[sliceI][j][k] - (float)slices[sliceJ][j][k])/2);
+    ofstream outRaw(output_prefix + ".raw", ios::binary);
+    for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
+            outRaw << (unsigned char)(abs((float)slices[sliceI][i][j] - (float)slices[sliceJ][i][j]) / 2);
         }
     }
-
-    ofstream outRaw(output_prefix + ".raw", ios::binary);
-    outRaw.write(reinterpret_cast<char*>(diff), slices.size());
     outRaw.close();
     cout << "Successfully computed diffmap from slice " << sliceI << " to " << sliceJ << " and saved result to " << output_prefix << ".raw" << endl;
 }
@@ -138,14 +139,20 @@ void MZMTIN002::VolImage::extract(int sliceId, string output_prefix) {
     string head = to_string(width) + to_string(height) +" 1";
     outdat << head.c_str();
     outdat.close();
-    
-    ofstream outRaw(output_prefix + ".raw", ios::binary);
-    for (auto i = 0; i < height; i++) {
-        for (auto j = 0; j < width; j++) {
-            outRaw << slices[sliceId][i][j];
+
+//    readImages(output_prefix);
+
+    for (int k = 0; k < slices.size(); k++) {
+        if (k == sliceId) {
+            ofstream outRaw(output_prefix + ".raw", ios::binary);
+            for (auto i = 0; i < height; i++) {
+                for (auto j = 0; j < width; j++) {
+                    outRaw << slices[sliceId][i][j];
+                }
+            }
+            outRaw.close();
         }
     }
-    outRaw.close();
 
     cout << "Successfully extracted slice " << sliceId << " from the vector and saved result to " << output_prefix << ".raw" << endl;
 }
