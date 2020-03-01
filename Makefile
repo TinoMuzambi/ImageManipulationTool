@@ -1,3 +1,6 @@
+# Tinotenda Muzambi
+# MZMTIN002
+
 default:
 	@g++ main.cpp volimage.cpp -o volimage
 

@@ -8,9 +8,9 @@ int main(int argc, char* argv[]) {
     int j;
     string outfile;
     MZMTIN002::VolImage volImage;
-    vector<string> comms;
-    for (int i = 1; i < argc; i++) {
-        comms.emplace_back(argv[i]);
+    vector<string> comms; //Vector of string to contain the command line arguments.
+    for (int k = 1; k < argc; k++) {
+        comms.emplace_back(argv[k]);
     }
     if (comms.empty()) {
         puts("Arguments required. No arguments found.");
@@ -28,7 +28,13 @@ int main(int argc, char* argv[]) {
         i = stoi(comms[2]);
         j = stoi(comms[3]);
         outfile = comms[4];
-        volImage.diffmap(i, j, outfile);
+        if (comms[1] == "-d"){
+            volImage.diffmap(i, j, outfile);
+        }
+        else {
+            puts("Invalid arguments.");
+            exit(0);
+        }
         cout << "Number of images: " << volImage.numImages << endl;
         cout << "Number of bytes required: " << volImage.volImageSize() << endl;
     }
@@ -37,7 +43,16 @@ int main(int argc, char* argv[]) {
         volImage.readImages(prefix);
         i = stoi(comms[2]);
         outfile = comms[3];
-        volImage.extract(i, outfile);
+        if (comms[1] == "-x") {
+            volImage.extract(i, outfile);
+        }
+        else if (comms[1] == "-g"){
+            volImage.extractrow(i, outfile);
+        }
+        else {
+            puts("Invalid arguments.");
+            exit(0);
+        }
         cout << "Number of images: " << volImage.numImages << endl;
         cout << "Number of bytes required: " << volImage.volImageSize() << endl;
     }

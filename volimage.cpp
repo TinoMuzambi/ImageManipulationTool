@@ -2,6 +2,9 @@
 
 #include "volimage.h"
 
+/**
+ * Constructor, initialise instance variables to zero-values.
+ */
 MZMTIN002::VolImage::VolImage() {
     MZMTIN002::VolImage::width = 0;
     MZMTIN002::VolImage::height = 0;
@@ -9,6 +12,9 @@ MZMTIN002::VolImage::VolImage() {
     MZMTIN002::VolImage::slices.clear();
 }
 
+/**
+ * Destructor, delete memory used during program.
+ */
 MZMTIN002::VolImage::~VolImage() {
     for (auto x = 0; x < slices.size(); x++) {
         for (auto y = 0; y < height; y++) {
@@ -18,13 +24,19 @@ MZMTIN002::VolImage::~VolImage() {
     }
 }
 
+/**
+ * This method reads in the raw files and populates a vector
+ * of unsigned char** with the data.
+ * @param baseName name of the raw files sequence.
+ * @return true for success, false otherwise.
+ */
 bool MZMTIN002::VolImage::readImages(string baseName) {
     ifstream in(baseName + ".data");
     string header;
     getline(in, header);
     stringstream ss(header);
     string token;
-    vector<string> dims; // Vector that stores the ints in the data file.
+    vector<string> dims; // Vector that stores the ints from the header file.
     while (getline(ss, token, ' ')) {
         dims.push_back(token);
     }
@@ -53,29 +65,41 @@ bool MZMTIN002::VolImage::readImages(string baseName) {
     return true;
 }
 
+/**
+ * Computes diffmap between two raw files and writes it out to
+ * another output raw file.
+ * @param sliceI the first raw file.
+ * @param sliceJ the second raw file.
+ * @param output_prefix the output filename sequence.
+ */
 void MZMTIN002::VolImage::diffmap(int sliceI, int sliceJ, string output_prefix) {
     ofstream outRaw(output_prefix + ".raw", ios::binary);
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
-            outRaw << (unsigned char)(abs((float)slices[sliceI][i][j] - (float)slices[sliceJ][i][j]) / 2);
+            outRaw << (unsigned char)(abs((float)slices[sliceI][i][j] - (float)slices[sliceJ][i][j]) / 2); //Formula for computing diffmap.
         }
     }
     outRaw.close();
     cout << "Successfully computed diffmap from slice " << sliceI << " to " << sliceJ << " and saved result to " << output_prefix << ".raw" << endl;
 }
 
+/**
+ * Extract one slice from the slices vector and write
+ * it out to the output file.
+ * @param sliceId the slice to extract.
+ * @param output_prefix he output filename sequence.
+ */
 void MZMTIN002::VolImage::extract(int sliceId, string output_prefix) {
     ofstream outdat(output_prefix + ".dat", ios::binary);
-    string head = to_string(width) + to_string(height) +" 1";
-    outdat << head.c_str();
+    outdat << to_string(width) + to_string(height) +" 1";
     outdat.close();
 
-    for (int k = 0; k < slices.size(); k++) {
-        if (k == sliceId) {
+    for (auto i = 0; i < slices.size(); i++) {
+        if (i == sliceId) {
             ofstream outRaw(output_prefix + ".raw", ios::binary);
-            for (auto i = 0; i < height; i++) {
-                for (auto j = 0; j < width; j++) {
-                    outRaw << slices[sliceId][i][j];
+            for (auto j = 0; j < height; j++) {
+                for (auto k = 0; k < width; k++) {
+                    outRaw << slices[sliceId][j][k];
                 }
             }
             outRaw.close();
@@ -85,6 +109,35 @@ void MZMTIN002::VolImage::extract(int sliceId, string output_prefix) {
     cout << "Successfully extracted slice " << sliceId << " from the vector and saved result to " << output_prefix << ".raw" << endl;
 }
 
+/**
+ * Extract one slice row from the slices vector and write
+ * it out to the output file.
+ * @param sliceId the slice to extract.
+ * @param output_prefix he output filename sequence.
+ */
+void MZMTIN002::VolImage::extractrow(int sliceId, string output_prefix) {
+    ofstream outdat(output_prefix + ".dat", ios::binary);
+    outdat << to_string(width) + to_string(height) +" 1";
+    outdat.close();
+
+    for (auto i = 0; i < slices.size(); i++) {
+        ofstream outRaw(output_prefix + ".raw", ios::binary);
+        for (auto j = 0; j < height; j++) {
+            outRaw << slices[i][sliceId];
+        }
+        outRaw.close();
+    }
+
+    cout << "Successfully extracted slice row " << sliceId << " from the vector and saved result to " << output_prefix << ".raw" << endl;
+}
+
+/**
+ * Compute number of bytes used to store image data bytes.
+ * @return int number of bytes.
+ */
 int MZMTIN002::VolImage::volImageSize(void) {
+    // 16287537
+    // 299119
     return width * height * numImages + sizeof(char) + sizeof(char*) + sizeof(char**);
 }
+
