@@ -1,13 +1,15 @@
 default:
-	g++ volimage.cpp -o volimage
+	@g++ main.cpp volimage.cpp -o volimage
 
-volimage.run: volimage.o
-	g++ volimage.run volimage.o
-volimage.o: volimage.cpp
+main.run: main.o volimage.o
+	g++ main.run main.o volimage.o
+main.o: main.cpp volimage.h
+	g++ -c -o main.o main.cpp
+volimage.o: volimage.cpp volimage.h
 	g++ -c -o volimage.o volimage.cpp
 
 clean:
-	rm -f ./volimage *.o
-	rm -f *.dat
-	rm -f *.bin
-	rm -f *.raw
+	@rm -f ./volimage *.o
+	@rm -f *.dat
+	@rm -f *.bin
+	@rm -f *.raw
